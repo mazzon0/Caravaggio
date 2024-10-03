@@ -16,4 +16,8 @@ if(CRVG_PLATFORM STREQUAL "Windows")
     target_compile_definitions(engine PUBLIC CP_WINDOWS)
 endif()
 
-target_include_directories(engine PRIVATE "${PROJECT_SOURCE_DIR}/include")
+target_include_directories(engine PRIVATE
+    "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}/ext")
+
+target_link_libraries(engine PUBLIC glfw)

@@ -16,9 +16,9 @@ namespace engine {
         void iRun();
         void iExit();
 
-        const char* executablePath;
-        bool running;
-        GameScript* gameScript;
+        const char* m_executablePath;
+        bool m_running;
+        GameScript* m_gameScript;
 
     private:
         Application() = default;

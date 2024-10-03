@@ -4,20 +4,20 @@ namespace engine {
 
     void Application::iInit(const char* exePath, GameScript* script) {
         // TODO: check gameScript not nullptr
-        executablePath = exePath;
-        running = true;
-        gameScript = script;
+        m_executablePath = exePath;
+        m_running = true;
+        m_gameScript = script;
 
-        gameScript->init();
+        m_gameScript->init();
     }
 
     void Application::iRun() {
-        gameScript->update();
+        m_gameScript->update();
     }
 
     void Application::iExit() {
-        gameScript->exit();
-        delete gameScript;
+        m_gameScript->exit();
+        delete m_gameScript;
     }
 
 }

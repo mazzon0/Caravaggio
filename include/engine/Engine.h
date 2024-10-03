@@ -1,2 +1,5 @@
 #include "application/Macro.h"
 #include "application/Application.h"
+#include "ui/Window.h"
+#include "platform/Input.h"
+#include "platform/Platform.h"
