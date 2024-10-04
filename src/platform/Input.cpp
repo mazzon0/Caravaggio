@@ -11,6 +11,10 @@ namespace engine {
         void getCursorPos(const Window& window, double* x, double* y) {
             glfwGetCursorPos(window.m_pWindow, x, y);
         }
+        
+        bool isButtonPressed(const Window& window, int button) {
+            return glfwGetMouseButton(window.m_pWindow, button) == GLFW_PRESS;
+        }
 
     }
 

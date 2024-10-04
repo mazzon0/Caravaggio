@@ -1,16 +1,17 @@
 #include <engine/Engine.h>
 #include <engine/Entry.h>
 #include <iostream>
-#include <optional>
 
 class Sandbox final : public engine::GameScript {
 private:
     engine::Window window;
 
 public:
+    Sandbox():window(engine::WindowStyle::RESIZABLE)
+    {}
 
     void init() override {
-        window = engine::Window("Caravaggio", 600, 400);
+        window.show("Caravaggio", 600, 400);
         std::cout << "Sandbox" << std::endl;
     }
 

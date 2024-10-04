@@ -1,7 +1,9 @@
 #ifndef CRVG_WINDOW
 #define CRVG_WINDOW
 
+#include "engine/events/EventSystem.h"
 #include <string>
+#include <utility>
 #include <glfw/glfw3.h>
 
 namespace engine {
@@ -11,7 +13,8 @@ namespace engine {
     namespace Input {
         bool isKeyDown(const Window&, int);
         void getCursorPos(const Window&, double*, double*);
-    }   // end of forward declarations
+        bool isButtonPressed(const Window&, int);
+    }   // forward declarations
 
     enum WindowStyle {
         RESIZABLE,
@@ -20,27 +23,32 @@ namespace engine {
         CUSTOM
     };
 
-    /* TODO: add event callbacks, icon support (glfwSetWindowIcon), cursor (glfwSetCursor) */
+    /* TODO: icon support (glfwSetWindowIcon), cursor (glfwSetCursor) */
     class Window {
     public:
-        Window(std::string title, int width, int height,
-            WindowStyle style = RESIZABLE, bool fullscreen = false, bool cursorVisible = true);
+        Window(WindowStyle style, bool fullscreen = false, bool cursorVisible = true);
         ~Window();
 
-        Window() {m_init=false;}    // does not open any window
-        Window(const Window& wnd);
-        Window& operator = (const Window& wnd);
+        Window() = delete;
+        Window(const Window& wnd) = delete;
+        Window& operator = (const Window& wnd) = delete;
 
-        /* TODO: title get set */
+        void setTitle(std::string title);
+        std::string getTitle();
         void setFullscreen(bool fullscreen);
         bool getFullscreen() const {return m_fullscreen;}
         void setCursorVisibility(bool visible);
         bool getCursorVisibility() const {return m_cursorVisible;}
         bool shouldClose() const;
+        void show(std::string title, int width, int height);
 
-    private:
-        void createWindow(const char* title, int width, int height);
-        void destroyWindow();
+        void addKeyEvent(int key, int scancode, int action, int mods);
+        void addCharEvent(uint32_t codepoint, int mods);
+        void addDropEvent(int count, const char* paths[]);
+        void addScrollEvent(double dx, double dy);
+        void addCursorEnterEvent(int entered);
+        void addCursorPosEvent(double x, double y);
+        void addMouseButtonEvent(int button, int actions, int mods);
 
     private:
         GLFWwindow* m_pWindow;
@@ -49,15 +57,24 @@ namespace engine {
         bool m_cursorVisible;
         int m_windowedPos[2];
         int m_windowedSize[2];
-
-        // allow reinitialization
-        bool m_init;
+        bool m_isShowing;
+        EventSystem m_eventSystem;
 
         static uint16_t s_nWindows;
 
         friend bool Input::isKeyDown(const Window&, int);
         friend void Input::getCursorPos(const Window&, double*, double*);
+        friend bool Input::isButtonPressed(const Window&, int);
     };
+
+    Window* getWindow(GLFWwindow* wnd);
+    void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods);
+    void charCallback(GLFWwindow* wnd, uint32_t codepoint, int mods);
+    void dropCallback(GLFWwindow* wnd, int count, const char* paths[]);
+    void scrollCallback(GLFWwindow* wnd, double dx, double dy);
+    void cursorEnterCallback(GLFWwindow* wnd, int entered);
+    void cursorPosCallback(GLFWwindow* wnd, double x, double y);
+    void mouseButtonCallback(GLFWwindow* wnd, int button, int action, int mods);
 
 }
 

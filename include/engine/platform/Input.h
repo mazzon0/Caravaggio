@@ -5,11 +5,12 @@
 
 namespace engine {
 
-    /* TODO: substitute glfw key names with custom names */
+    /* TODO: substitute glfw names with custom names */
     namespace Input {
         bool isKeyDown(const Window& window, int key);
         void getCursorPos(const Window& window, double* x, double* y);
-        /* TODO: mouse buttons, joystick */
+        bool isButtonPressed(const Window& window, int button);
+        /* TODO: joystick */
     }
 
 }

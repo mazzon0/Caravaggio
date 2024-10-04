@@ -5,41 +5,21 @@ namespace engine {
 
     uint16_t Window::s_nWindows = 0;
 
-    Window::Window(std::string title, int width, int height,
-        WindowStyle style, bool fullscreen, bool cursorVisible)
-        : m_fullscreen(fullscreen),m_cursorVisible(cursorVisible),m_style(style)
+    Window::Window(WindowStyle style, bool fullscreen, bool cursorVisible)
+        : m_fullscreen(fullscreen), m_cursorVisible(cursorVisible), m_style(style), m_eventSystem()
     {
-        /* TODO: check errors in parameters */
-
-        // initialize glfw library
         if(s_nWindows==0) {
             glfwInit();
         }
 
-        // window initialization
-        createWindow(title.c_str(), width, height);
-        ++ s_nWindows;
-        m_init=true;
-    }
-
-    Window::Window(const Window& wnd)
-    {
-        if(wnd.m_init) {
-            m_style = wnd.m_style;
-            m_fullscreen = wnd.m_fullscreen;
-            m_cursorVisible = wnd.m_cursorVisible;
-            m_windowedPos[0] = wnd.m_windowedPos[0]; m_windowedPos[1] = wnd.m_windowedPos[1];
-            m_windowedSize[0] = wnd.m_windowedSize[0]; m_windowedSize[1] = wnd.m_windowedSize[1];
-            createWindow(glfwGetWindowTitle(wnd.m_pWindow), m_windowedSize[0], m_windowedSize[1]);
-        }
-        else
-            m_init=false;
-        
-        ++ s_nWindows;
+        m_pWindow = nullptr;
+        m_isShowing = false;
+        ++s_nWindows;
     }
 
     Window::~Window() {
-        destroyWindow();
+        glfwDestroyWindow(m_pWindow);
+        --s_nWindows;
 
         // destroy remaining windows just in case
         if(s_nWindows==0) {
@@ -47,24 +27,13 @@ namespace engine {
         }
     }
 
-    Window& Window::operator = (const Window& wnd) {
-        if(m_init)
-            destroyWindow();
-        
-        if(wnd.m_init) {
-            m_style = wnd.m_style;
-            m_fullscreen = wnd.m_fullscreen;
-            m_cursorVisible = wnd.m_cursorVisible;
-            m_windowedPos[0] = wnd.m_windowedPos[0]; m_windowedPos[1] = wnd.m_windowedPos[1];
-            m_windowedSize[0] = wnd.m_windowedSize[0]; m_windowedSize[1] = wnd.m_windowedSize[1];
-            m_init=true;
-            createWindow(glfwGetWindowTitle(wnd.m_pWindow), m_windowedSize[0], m_windowedSize[1]);
-        }
-        else
-            m_init=false;
-        
-        ++ s_nWindows;
-        return *this;
+    void Window::setTitle(std::string title) {
+        glfwSetWindowTitle(m_pWindow, title.c_str());
+    }
+
+    std::string Window::getTitle() {
+        std::string s = glfwGetWindowTitle(m_pWindow);
+        return s;
     }
 
     void Window::setFullscreen(bool fullscreen) {
@@ -76,18 +45,27 @@ namespace engine {
 
     void Window::setCursorVisibility(bool visible) {
         m_cursorVisible = visible;
-        if(m_cursorVisible)
+        if(m_cursorVisible) {
             glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else
+        }
+        else {
             glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 
     bool Window::shouldClose() const {
         return glfwWindowShouldClose(m_pWindow);
     }
 
-    void Window::createWindow(const char* title, int width, int height) {
-                // settings to create the window
+    void Window::show(std::string title, int width, int height) {
+        /* TODO: check errors in parameters */
+
+        if(m_isShowing) {
+            std::cout << "WARN: trying to show a window already showed" << std::endl;
+            return;
+        }
+
+        // settings to create the window
         switch(m_style) {
             case RESIZABLE:
                 glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -113,21 +91,91 @@ namespace engine {
         GLFWmonitor* monitor = m_fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
         // window creation
-        m_pWindow = glfwCreateWindow(width, height, title, monitor, nullptr);
+        m_pWindow = glfwCreateWindow(width, height, title.c_str(), monitor, nullptr);
         if(m_pWindow==nullptr) {
             std::cout << "ERROR: window failed to be created" << std::endl;
         }
 
-        // initialize remaining attributes
         glfwGetWindowPos(m_pWindow, &m_windowedPos[0], &m_windowedPos[1]);
         glfwGetWindowSize(m_pWindow, &m_windowedSize[0], &m_windowedSize[1]);
-
         setCursorVisibility(m_cursorVisible);
+        glfwSetWindowUserPointer(m_pWindow, this);
+
+        // setting callbacks
+        glfwSetKeyCallback(m_pWindow, keyCallback);
+        glfwSetCharModsCallback(m_pWindow, charCallback);
+        glfwSetDropCallback(m_pWindow, dropCallback);
+        glfwSetScrollCallback(m_pWindow, scrollCallback);
+        glfwSetCursorEnterCallback(m_pWindow, cursorEnterCallback);
+        glfwSetCursorPosCallback(m_pWindow, cursorPosCallback);
+        glfwSetMouseButtonCallback(m_pWindow, mouseButtonCallback);
+
+        m_isShowing = true;
     }
 
-    void Window::destroyWindow() {
-        glfwDestroyWindow(m_pWindow);
-        --s_nWindows;
+    // event callbacks related functions
+
+    void Window::addKeyEvent(int key, int scancode, int action, int mods) {
+        m_eventSystem.addEvent(std::make_unique<KeyEvent>(key, scancode, action, mods));
     }
+
+    void Window::addCharEvent(uint32_t codepoint, int mods) {
+        m_eventSystem.addEvent(std::make_unique<CharEvent>(codepoint, mods));
+    }
+
+    void Window::addDropEvent(int count, const char* paths[]) {
+        m_eventSystem.addEvent(std::make_unique<DropEvent>(count, paths));
+    }
+
+    void Window::addScrollEvent(double dx, double dy) {
+        m_eventSystem.addEvent(std::make_unique<ScrollEvent>(dx, dy));
+    }
+
+    void Window::addCursorEnterEvent(int entered) {
+        m_eventSystem.addEvent(std::make_unique<CursorEnterEvent>(entered));
+    }
+
+    void Window::addCursorPosEvent(double x, double y) {
+        m_eventSystem.addEvent(std::make_unique<CursorPosEvent>(x, y));
+    }
+
+    void Window::addMouseButtonEvent(int button, int actions, int mods) {
+        m_eventSystem.addEvent(std::make_unique<MouseButtonEvent>(button, actions, mods));
+    }
+
+
+    // non-member functions
+
+    Window* getWindow(GLFWwindow* wnd) {
+        Window* window = static_cast<Window*>(glfwGetWindowUserPointer(wnd));
+    }
+
+    void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods) {
+        getWindow(wnd)->addKeyEvent(key, scancode, action, mods);
+    }
+
+    void charCallback(GLFWwindow* wnd, uint32_t codepoint, int mods) {
+        getWindow(wnd)->addCharEvent(codepoint, mods);
+    }
+
+    void dropCallback(GLFWwindow* wnd, int count, const char* paths[]) {
+        getWindow(wnd)->addDropEvent(count, paths);
+    }
+
+    void scrollCallback(GLFWwindow* wnd, double dx, double dy) {
+        getWindow(wnd)->addScrollEvent(dx, dy);
+    }
+
+    void cursorEnterCallback(GLFWwindow* wnd, int entered) {
+        getWindow(wnd)->addCursorEnterEvent(entered);
+    }
+
+    void cursorPosCallback(GLFWwindow* wnd, double x, double y) {
+        getWindow(wnd)->addCursorPosEvent(x, y);
+    }
+
+    void mouseButtonCallback(GLFWwindow* wnd, int button, int action, int mods) {
+        getWindow(wnd)->addMouseButtonEvent(button, action, mods);
+    }    
 
 }
