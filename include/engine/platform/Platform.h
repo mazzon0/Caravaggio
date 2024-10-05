@@ -4,7 +4,7 @@
 namespace engine {
 
     namespace Platform {
-        void SendEvents();
+        void sendEvents();
     }
 
 }

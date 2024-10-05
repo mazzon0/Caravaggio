@@ -13,23 +13,21 @@ namespace engine {
         SCROLL,
         CURSOR_ENTER,
         CURSOR_POS,
-        MOUSE_BUTTON
+        MOUSE_BUTTON,
+        WINDOW_CLOSE,
+        WINDOW_RESIZE,
+        WINDOW_FOCUS,
+        WINDOW_ICONIFY
     };
 
-    class Event {
-    public:
-        virtual ~Event() = default;
-        virtual EventType getEventType() const = 0; // Pure virtual function to identify event type
-    };
-
-    // children of Event
     class Event {
     public:
         bool m_handled;
         Event() {m_handled = false;}
-        virtual EventType getEventType() const;
+        virtual EventType getEventType() const = 0;
     };
 
+    // children of Event
     class KeyEvent final : public Event {
     public:
         int m_key, m_scancode, m_action, m_mods;
@@ -83,6 +81,33 @@ namespace engine {
         int m_button, m_action, m_mods;
         MouseButtonEvent(int button, int action, int mods) : m_button(button), m_action(action), m_mods(mods) {}
         EventType getEventType() const override { return EventType::MOUSE_BUTTON; }
+    };
+
+    class WindowCloseEvent final : public Event {
+    public:
+        WindowCloseEvent() = default;
+        EventType getEventType() const override { return EventType::WINDOW_CLOSE; }
+    };
+
+    class WindowResizeEvent final : public Event {
+    public:
+        int m_width, m_height;
+        WindowResizeEvent(int width, int height) : m_width(width), m_height(height) {}
+        EventType getEventType() const override { return EventType::WINDOW_RESIZE; }
+    };
+
+    class WindowFocusEvent final : public Event {
+    public:
+        int m_focused;
+        WindowFocusEvent(int focused) : m_focused(focused) {}
+        EventType getEventType() const override { return EventType::WINDOW_FOCUS; }
+    };
+
+    class WindowIconifyEvent final : public Event {
+    public:
+        int m_iconified;
+        WindowIconifyEvent(int iconified) : m_iconified(iconified) {}
+        EventType getEventType() const override { return EventType::WINDOW_ICONIFY; }
     };
 
 }

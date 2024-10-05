@@ -46,10 +46,10 @@ namespace engine {
     void Window::setCursorVisibility(bool visible) {
         m_cursorVisible = visible;
         if(m_cursorVisible) {
-            glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
         else {
-            glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
 
@@ -109,45 +109,73 @@ namespace engine {
         glfwSetCursorEnterCallback(m_pWindow, cursorEnterCallback);
         glfwSetCursorPosCallback(m_pWindow, cursorPosCallback);
         glfwSetMouseButtonCallback(m_pWindow, mouseButtonCallback);
+        glfwSetWindowCloseCallback(m_pWindow, windowCloseCallback);
+        glfwSetWindowSizeCallback(m_pWindow, windowSizeCallback);
+        glfwSetWindowFocusCallback(m_pWindow, windowFocusCallback);
+        glfwSetWindowIconifyCallback(m_pWindow, windowIconifyCallback);
 
         m_isShowing = true;
     }
 
-    // event callbacks related functions
+    void Window::close() {
+        glfwSetWindowShouldClose(m_pWindow, GLFW_FALSE);
+    }
 
+    void Window::forEachEvent(const std::function<void(Event&)>& action) {
+        m_eventSystem.forEach(action);
+    }
+
+
+    // event callbacks related functions
     void Window::addKeyEvent(int key, int scancode, int action, int mods) {
-        m_eventSystem.addEvent(std::make_unique<KeyEvent>(key, scancode, action, mods));
+        m_eventSystem.addEvent<KeyEvent>(key, scancode, action, mods);
     }
 
     void Window::addCharEvent(uint32_t codepoint, int mods) {
-        m_eventSystem.addEvent(std::make_unique<CharEvent>(codepoint, mods));
+        m_eventSystem.addEvent<CharEvent>(codepoint, mods);
     }
 
     void Window::addDropEvent(int count, const char* paths[]) {
-        m_eventSystem.addEvent(std::make_unique<DropEvent>(count, paths));
+        m_eventSystem.addEvent<DropEvent>(count, paths);
     }
 
     void Window::addScrollEvent(double dx, double dy) {
-        m_eventSystem.addEvent(std::make_unique<ScrollEvent>(dx, dy));
+        m_eventSystem.addEvent<ScrollEvent>(dx, dy);
     }
 
     void Window::addCursorEnterEvent(int entered) {
-        m_eventSystem.addEvent(std::make_unique<CursorEnterEvent>(entered));
+        m_eventSystem.addEvent<CursorEnterEvent>(entered);
     }
 
     void Window::addCursorPosEvent(double x, double y) {
-        m_eventSystem.addEvent(std::make_unique<CursorPosEvent>(x, y));
+        m_eventSystem.addEvent<CursorPosEvent>(x, y);
     }
 
-    void Window::addMouseButtonEvent(int button, int actions, int mods) {
-        m_eventSystem.addEvent(std::make_unique<MouseButtonEvent>(button, actions, mods));
+    void Window::addMouseButtonEvent(int button, int action, int mods) {
+        m_eventSystem.addEvent<MouseButtonEvent>(button, action, mods);
+    }
+
+    void Window::addWindowCloseEvent() {
+        m_eventSystem.addEvent<WindowCloseEvent>();
+    }
+
+    void Window::addWindowResizeEvent(int width, int height) {
+        m_eventSystem.addEvent<WindowResizeEvent>(width, height);
+    }
+
+    void Window::addWindowFocusEvent(int focused) {
+        m_eventSystem.addEvent<WindowFocusEvent>(focused);
+    }
+
+    void Window::addWindowIconifyEvent(int iconified) {
+        m_eventSystem.addEvent<WindowIconifyEvent>(iconified);
     }
 
 
     // non-member functions
 
     Window* getWindow(GLFWwindow* wnd) {
-        Window* window = static_cast<Window*>(glfwGetWindowUserPointer(wnd));
+        return static_cast<Window*>(glfwGetWindowUserPointer(wnd));
     }
 
     void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods) {
@@ -176,6 +204,22 @@ namespace engine {
 
     void mouseButtonCallback(GLFWwindow* wnd, int button, int action, int mods) {
         getWindow(wnd)->addMouseButtonEvent(button, action, mods);
-    }    
+    }
+
+    void windowCloseCallback(GLFWwindow* wnd) {
+        getWindow(wnd)->addWindowCloseEvent();
+    }
+
+    void windowSizeCallback(GLFWwindow* wnd, int w, int h) {
+        getWindow(wnd)->addWindowResizeEvent(w, h);
+    }
+
+    void windowFocusCallback(GLFWwindow* wnd, int focus) {
+        getWindow(wnd)->addWindowFocusEvent(focus);
+    }
+
+    void windowIconifyCallback(GLFWwindow* wnd, int iconified) {
+        getWindow(wnd)->addWindowIconifyEvent(iconified);
+    }
 
 }

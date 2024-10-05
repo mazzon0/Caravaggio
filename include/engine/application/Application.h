@@ -11,10 +11,13 @@ namespace engine {
         static inline void run() { getInstance().iRun();}
         static inline void exit() { getInstance().iExit();}
 
+        static inline void close() { getInstance().iClose(); }
+
     private:
         void iInit(const char* exePath, GameScript* script);
         void iRun();
         void iExit();
+        void iClose() { m_running = false; }
 
         const char* m_executablePath;
         bool m_running;

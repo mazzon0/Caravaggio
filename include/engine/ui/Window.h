@@ -41,6 +41,9 @@ namespace engine {
         bool getCursorVisibility() const {return m_cursorVisible;}
         bool shouldClose() const;
         void show(std::string title, int width, int height);
+        void close();
+
+        void forEachEvent(const std::function<void(Event&)>& action);
 
         void addKeyEvent(int key, int scancode, int action, int mods);
         void addCharEvent(uint32_t codepoint, int mods);
@@ -49,16 +52,20 @@ namespace engine {
         void addCursorEnterEvent(int entered);
         void addCursorPosEvent(double x, double y);
         void addMouseButtonEvent(int button, int actions, int mods);
+        void addWindowCloseEvent();
+        void addWindowResizeEvent(int width, int height);
+        void addWindowFocusEvent(int focused);
+        void addWindowIconifyEvent(int iconified);
 
     private:
-        GLFWwindow* m_pWindow;
         WindowStyle m_style;
-        bool m_fullscreen;
-        bool m_cursorVisible;
+        EventSystem m_eventSystem;
+        GLFWwindow* m_pWindow;
         int m_windowedPos[2];
         int m_windowedSize[2];
+        bool m_fullscreen;
+        bool m_cursorVisible;
         bool m_isShowing;
-        EventSystem m_eventSystem;
 
         static uint16_t s_nWindows;
 
@@ -75,6 +82,10 @@ namespace engine {
     void cursorEnterCallback(GLFWwindow* wnd, int entered);
     void cursorPosCallback(GLFWwindow* wnd, double x, double y);
     void mouseButtonCallback(GLFWwindow* wnd, int button, int action, int mods);
+    void windowCloseCallback(GLFWwindow* wnd);
+    void windowSizeCallback(GLFWwindow* wnd, int w, int h);
+    void windowFocusCallback(GLFWwindow* wnd, int focus);
+    void windowIconifyCallback(GLFWwindow* wnd, int iconified);
 
 }
 

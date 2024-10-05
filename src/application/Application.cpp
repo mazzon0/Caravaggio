@@ -1,4 +1,5 @@
 #include "engine/application/Application.h"
+#include "engine/platform/Platform.h"
 
 namespace engine {
 
@@ -12,7 +13,10 @@ namespace engine {
     }
 
     void Application::iRun() {
-        m_gameScript->update();
+        while(m_running) {
+            m_gameScript->update();
+            Platform::sendEvents();
+        }
     }
 
     void Application::iExit() {

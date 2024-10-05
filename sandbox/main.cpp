@@ -16,12 +16,22 @@ public:
     }
 
     void update() override {
-        std::cout << "Update" << std::endl;
-        for(int i=0; i<1000000000; i++) {}
+        window.forEachEvent(std::function<void(engine::Event&)>([this](engine::Event& event) {
+            this->processEvent(event);
+        }));
     }
 
     void exit() override {
         std::cout << "Exit" << std::endl;
+    }
+
+    // user defined functions
+    void processEvent(engine::Event& event) {
+        switch(event.getEventType()) {
+            case engine::EventType::WINDOW_CLOSE:
+                engine::Application::close();
+                break;
+        }
     }
 
 };

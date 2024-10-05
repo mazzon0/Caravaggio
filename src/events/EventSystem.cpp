@@ -6,12 +6,16 @@ namespace engine {
         events.reserve(STD_CAPACITY);
     }
 
-    void EventSystem::addEvent(std::unique_ptr<Event> e) {
-        events.push_back(e);
-    }
-
     void EventSystem::reset() {
         events.clear();
+    }
+
+    void EventSystem::forEach(const std::function<void(Event&)>& action) {
+        for (std::unique_ptr<Event>& event : events) {
+            if (event) {
+                action(*event);
+            }
+        }
     }
 
 }
