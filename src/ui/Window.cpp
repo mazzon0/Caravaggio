@@ -57,6 +57,10 @@ namespace engine {
         return glfwWindowShouldClose(m_pWindow);
     }
 
+    void Window::getSize(int* pWidth, int* pHeight) {
+        glfwGetWindowSize(m_pWindow, pWidth, pHeight);
+    }
+
     void Window::show(std::string title, int width, int height) {
         /* TODO: check errors in parameters */
 
@@ -117,7 +121,7 @@ namespace engine {
         m_isShowing = true;
     }
 
-    void Window::close() {
+    void Window::close() const {
         glfwSetWindowShouldClose(m_pWindow, GLFW_FALSE);
     }
 

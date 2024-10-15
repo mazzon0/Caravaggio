@@ -1,5 +1,5 @@
 #include "application/Macro.h"
 #include "application/Application.h"
-#include "ui/Window.h"
+#include "ui/UserInterface.h"
 #include "platform/Input.h"
 #include "platform/Platform.h"

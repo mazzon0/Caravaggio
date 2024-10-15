@@ -5,6 +5,7 @@
 class Sandbox final : public engine::GameScript {
 private:
     engine::Window window;
+    engine::UserInterface ui;
 
 public:
     Sandbox():window(engine::WindowStyle::RESIZABLE)
@@ -12,6 +13,11 @@ public:
 
     void init() override {
         window.show("Caravaggio", 600, 400);
+        ui.setWindow(&window);
+        engine::DrawArea& area = ui.setCurrentState(0);
+        engine::FontSystem::registerFont("HP simplified", "hp.cfb");
+        engine::Text text("primo testo", "HP simplified");
+        area.add(text);
         std::cout << "Sandbox" << std::endl;
     }
 

@@ -40,9 +40,16 @@ namespace engine {
         void setCursorVisibility(bool visible);
         bool getCursorVisibility() const {return m_cursorVisible;}
         bool shouldClose() const;
+        void getSize(int* pWidth, int* pHeight);
         void show(std::string title, int width, int height);
-        void close();
+        void close() const;
 
+        /* TODO: add macros or functions to make forEachEvent less verbose
+         * current usage example:
+         *      window.forEachEvent(std::function<void(engine::Event&)>([this](engine::Event& event) {
+         *          this->processEvent(event);
+         *      }));
+         */
         void forEachEvent(const std::function<void(Event&)>& action);
 
         void addKeyEvent(int key, int scancode, int action, int mods);
