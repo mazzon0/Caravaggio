@@ -1,5 +1,6 @@
 #include "engine/application/Application.h"
 #include "engine/platform/Platform.h"
+#include "engine/graphics/vulkan/VKGraphics.h"
 
 namespace engine {
 
@@ -8,6 +9,7 @@ namespace engine {
         m_executablePath = exePath;
         m_running = true;
         m_gameScript = script;
+        m_graphics = new VKGraphics();  /* TODO: allow other apis */
 
         m_gameScript->init();
     }
@@ -21,6 +23,7 @@ namespace engine {
 
     void Application::iExit() {
         m_gameScript->exit();
+        delete m_graphics;
         delete m_gameScript;
     }
 

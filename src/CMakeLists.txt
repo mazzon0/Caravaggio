@@ -21,3 +21,4 @@ target_include_directories(engine PRIVATE
     "${PROJECT_SOURCE_DIR}/ext")
 
 target_link_libraries(engine PUBLIC glfw)
+target_link_libraries(engine PRIVATE volk)

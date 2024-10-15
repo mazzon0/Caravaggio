@@ -2,6 +2,7 @@
 #define CVRG_APP
 
 #include "engine/scripting/GameScript.h"
+#include "engine/graphics/Graphics.h"
 
 namespace engine {
 
@@ -19,6 +20,7 @@ namespace engine {
         void iExit();
         void iClose() { m_running = false; }
 
+        Graphics* m_graphics;
         const char* m_executablePath;
         bool m_running;
         GameScript* m_gameScript;
